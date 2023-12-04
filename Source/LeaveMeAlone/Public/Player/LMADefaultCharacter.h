@@ -51,6 +51,10 @@ private:
 
 	float FOV = 55.0f;
 
+	float DeltaLeng = 100.0f;
+	float MinLeng = 500.0f;
+	float MaxLeng = 2000.0f;
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void Scroll(float Value);
 };

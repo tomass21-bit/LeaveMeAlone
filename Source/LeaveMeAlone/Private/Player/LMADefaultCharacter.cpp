@@ -67,6 +67,8 @@ void ALMADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ALMADefaultCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ALMADefaultCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("Scroll", this, &ALMADefaultCharacter::Scroll);
+
 }
 
 void ALMADefaultCharacter::MoveForward(float Value)
@@ -77,4 +79,11 @@ void ALMADefaultCharacter::MoveForward(float Value)
 void ALMADefaultCharacter::MoveRight(float Value)
 {
 	AddMovementInput(GetActorRightVector(), Value);
+}
+
+void ALMADefaultCharacter::Scroll(float Value)
+{
+	if (((SpringArmComponent->TargetArmLength > MinLeng) && (Value < 0)) 
+		|| ((SpringArmComponent->TargetArmLength < MaxLeng) && (Value > 0)))
+		SpringArmComponent->TargetArmLength = SpringArmComponent->TargetArmLength + DeltaLeng * Value;
 }
