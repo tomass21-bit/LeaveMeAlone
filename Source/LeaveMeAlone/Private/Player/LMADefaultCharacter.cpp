@@ -83,7 +83,7 @@ void ALMADefaultCharacter::MoveRight(float Value)
 
 void ALMADefaultCharacter::Scroll(float Value)
 {
-	if (((SpringArmComponent->TargetArmLength > MinLeng) && (Value < 0)) 
-		|| ((SpringArmComponent->TargetArmLength < MaxLeng) && (Value > 0)))
-		SpringArmComponent->TargetArmLength = SpringArmComponent->TargetArmLength + DeltaLeng * Value;
+	if ((Value < 0 && SpringArmComponent->TargetArmLength < MaxLeng) 
+		|| (Value > 0 &&SpringArmComponent->TargetArmLength > MinLeng ))
+		SpringArmComponent->TargetArmLength = SpringArmComponent->TargetArmLength - (DeltaLeng * Value);
 }

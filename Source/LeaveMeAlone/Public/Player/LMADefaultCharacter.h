@@ -34,8 +34,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
 	FVector CursorSize = FVector(20.0f, 40.0f, 40.0f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpringArm")
+	float DeltaLeng = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpringArm")
+	float MinLeng = 500.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SpringArm")
+	float MaxLeng = 1000.0f;
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	void Scroll(float Value);
 
 public:	
 	// Called every frame
@@ -50,11 +57,8 @@ private:
 	float ArmLength = 1400.0f;
 
 	float FOV = 55.0f;
-
-	float DeltaLeng = 100.0f;
-	float MinLeng = 500.0f;
-	float MaxLeng = 2000.0f;
+	
 	void MoveForward(float Value);
 	void MoveRight(float Value);
-	void Scroll(float Value);
+	
 };
