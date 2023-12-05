@@ -14,6 +14,7 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
 	SpringArmComponent->SetupAttachment(GetRootComponent());
+
 	SpringArmComponent->SetUsingAbsoluteRotation(true);
 	SpringArmComponent->TargetArmLength = ArmLength;
 	SpringArmComponent->SetRelativeRotation(FRotator(YRotation, 0.0f, 0.0f));
