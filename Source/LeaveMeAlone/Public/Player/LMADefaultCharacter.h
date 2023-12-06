@@ -8,6 +8,8 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class UAnimMontage;
+class ULMAHealthComponent;
 
 UCLASS()
 class LEAVEMEALONE_API ALMADefaultCharacter : public ACharacter
@@ -18,6 +20,7 @@ class LEAVEMEALONE_API ALMADefaultCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ALMADefaultCharacter();
+	
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -44,6 +47,12 @@ protected:
 	virtual void BeginPlay() override;
 	void Scroll(float Value);
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Health")
+	ULMAHealthComponent* HealthComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	UAnimMontage* DeathMontage;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -61,4 +70,5 @@ private:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	
+	void OnDeath();
 };

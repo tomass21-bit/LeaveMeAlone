@@ -7,6 +7,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Components/LMAHealthComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 // Sets default values
 ALMADefaultCharacter::ALMADefaultCharacter()
 {
@@ -26,6 +28,8 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 	CameraComponent->SetFieldOfView(FOV);
 	CameraComponent->bUsePawnControlRotation = false;
 
+	HealthComponent = CreateDefaultSubobject<ULMAHealthComponent>("HealthComponent");
+
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
@@ -35,7 +39,7 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 void ALMADefaultCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	HealthComponent->OnDeath.AddUObject(this, &ALMADefaultCharacter::OnDeath);
 	if (CursorMaterial)
 	{
 		CurrentCursor = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), CursorMaterial, CursorSize, FVector(0));
@@ -87,4 +91,11 @@ void ALMADefaultCharacter::Scroll(float Value)
 	if ((Value < 0 && SpringArmComponent->TargetArmLength < MaxLeng) 
 		|| (Value > 0 &&SpringArmComponent->TargetArmLength > MinLeng ))
 		SpringArmComponent->TargetArmLength = SpringArmComponent->TargetArmLength - (DeltaLeng * Value);
+}
+
+void ALMADefaultCharacter::OnDeath()
+{
+	PlayAnimMontage(DeathMontage);
+	GetCharacterMovement()->DisableMovement();
+	SetLifeSpan(5.0f);
 }
