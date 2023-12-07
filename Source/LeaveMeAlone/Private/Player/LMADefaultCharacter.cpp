@@ -8,7 +8,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/LMAHealthComponent.h"
+#include "TimerManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
+
 // Sets default values
 ALMADefaultCharacter::ALMADefaultCharacter()
 {
@@ -33,6 +36,8 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
+
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 // Called when the game starts or when spawned
@@ -44,25 +49,19 @@ void ALMADefaultCharacter::BeginPlay()
 	{
 		CurrentCursor = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), CursorMaterial, CursorSize, FVector(0));
 	}
+	OnHealthChanged(HealthComponent->GetHealth());
+	HealthComponent->OnHealthChanged.AddUObject(this, &ALMADefaultCharacter::OnHealthChanged);
 }
 
 // Called every frame
 void ALMADefaultCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PC)
+	if (!(HealthComponent->IsDead()))
 	{
-		FHitResult ResultHit;
-		PC->GetHitResultUnderCursor(ECC_GameTraceChannel1, true, ResultHit);
-		float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
-		SetActorRotation(FQuat(FRotator(0.0f, FindRotatorResultYaw, 0.0f)));
-		if (CurrentCursor)
-		{
-			CurrentCursor->SetWorldLocation(ResultHit.Location);
-		}
+		RotationPlayerOnCursor();
 	}
+	
 }
 
 // Called to bind functionality to input
@@ -73,6 +72,8 @@ void ALMADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAxis("MoveForward", this, &ALMADefaultCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ALMADefaultCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Scroll", this, &ALMADefaultCharacter::Scroll);
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ALMADefaultCharacter::StartSprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ALMADefaultCharacter::StopSprint);
 
 }
 
@@ -95,7 +96,132 @@ void ALMADefaultCharacter::Scroll(float Value)
 
 void ALMADefaultCharacter::OnDeath()
 {
+	CurrentCursor->DestroyRenderState_Concurrent();
 	PlayAnimMontage(DeathMontage);
 	GetCharacterMovement()->DisableMovement();
 	SetLifeSpan(5.0f);
+	if (Controller)
+	{
+		Controller->ChangeState(NAME_Spectating);
+	}
+}
+void ALMADefaultCharacter::RotationPlayerOnCursor()
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PC)
+	{
+		FHitResult ResultHit;
+		PC->GetHitResultUnderCursor(ECC_GameTraceChannel1, true, ResultHit);
+		float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
+		SetActorRotation(FQuat(FRotator(0.0f, FindRotatorResultYaw, 0.0f)));
+		if (CurrentCursor)
+		{
+			CurrentCursor->SetWorldLocation(ResultHit.Location);
+		}
+	}
+}
+
+void ALMADefaultCharacter::OnHealthChanged(float NewHealth)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Health = %f"), NewHealth));
+}
+
+bool ULMAHealthComponent::IsHealthFull() const
+{
+	return FMath::IsNearlyEqual(Health, MaxHealth);
+}
+
+void ALMADefaultCharacter::StartSprint()
+{
+	if (!bIsSprinting && CurrentStamina > 0)
+	{
+		bIsSprinting = true;
+
+		
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	}
+
+	
+	if (GetWorldTimerManager().TimerExists(StaminaRechargeHandle))
+	{
+		GetWorldTimerManager().ClearTimer(StaminaRechargeHandle);
+	}
+
+	
+	if (!GetWorldTimerManager().TimerExists(StaminaDrainHandle))
+	{
+		GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &ALMADefaultCharacter::DrainStamina, StaminaDrainFrequency, true);
+	}
+
+	
+	if (bIsSprinting && CurrentStamina <= 0)
+	{
+		StopSprint();
+	}
+}
+
+void ALMADefaultCharacter::StopSprint() 
+{
+	if (bIsSprinting)
+	{
+		bIsSprinting = false;
+
+		
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	}
+
+	
+	if (GetWorldTimerManager().TimerExists(StaminaDrainHandle))
+	{
+		GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+	}
+
+	
+	if (!GetWorldTimerManager().TimerExists(StaminaRechargeHandle))
+	{
+		GetWorldTimerManager().SetTimer(
+			StaminaRechargeHandle, this, &ALMADefaultCharacter::RechargeStamina, StaminaRechargeFrequency, true);
+	}
+
+}
+void ALMADefaultCharacter::DrainStamina()
+{
+	
+	if (bIsSprinting && CurrentStamina > 0)
+	{
+		
+		CurrentStamina = FMath::Max(CurrentStamina + StaminaDrainAmount, 0);
+	}
+
+	
+	if (CurrentStamina <= 0 && !bIsSprinting)
+	{
+		GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+	}
+	
+	float StaminaPercent = CurrentStamina / MaxStamina;
+
+	
+}
+
+
+void ALMADefaultCharacter::RechargeStamina()
+{
+	
+	if (!bIsSprinting && CurrentStamina < MaxStamina)
+	{
+		
+		CurrentStamina = FMath::Min(CurrentStamina + StaminaRechargeAmount, MaxStamina);
+	}
+
+	
+	if (CurrentStamina >= MaxStamina)
+	{
+		GetWorldTimerManager().ClearTimer(StaminaRechargeHandle);
+	}
+
+	float StaminaPercent = CurrentStamina / MaxStamina;
+
+	
+
 }

@@ -19,6 +19,7 @@ void ULMAHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Health = MaxHealth;
+	OnHealthChanged.Broadcast(Health);
 
 	AActor* OwnerComponent = GetOwner();
 	if (OwnerComponent)
@@ -45,7 +46,7 @@ void ULMAHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		return;
 
 	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
-	//OnHealthChanged.Broadcast(Health);
+	OnHealthChanged.Broadcast(Health);
 
 	if (IsDead())
 	{
@@ -56,4 +57,13 @@ void ULMAHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
  bool ULMAHealthComponent::IsDead() const
 {
 	return Health <= 0.0f;
+}
+
+ bool ULMAHealthComponent::AddHealth(float NewHealth)
+{
+	if (IsDead() || IsHealthFull())
+		return false;
+	Health = FMath::Clamp(Health + NewHealth, 0.0f, MaxHealth);
+	OnHealthChanged.Broadcast(Health);
+	return true;
 }

@@ -21,6 +21,8 @@ public:
 	// Sets default values for this character's properties
 	ALMADefaultCharacter();
 	
+	UFUNCTION()
+	ULMAHealthComponent* GetHealthComponent() const { return HealthComponent; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -52,6 +54,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* DeathMontage;
+	
+	void StartSprint();
+	void StopSprint();
+	void DrainStamina();
+	void RechargeStamina();
 
 public:	
 	// Called every frame
@@ -66,9 +73,23 @@ private:
 	float ArmLength = 1400.0f;
 
 	float FOV = 55.0f;
-	
+	bool bIsSprinting = false;
+	float MaxStamina = 100.f;
+	float CurrentStamina = MaxStamina;
+	float StaminaDrainAmount = -10.f;
+	float StaminaRechargeAmount = 10.f;
+	float StaminaDrainFrequency = .3f;
+	float StaminaRechargeFrequency = .3f;
+	FTimerHandle StaminaDrainHandle;
+	FTimerHandle StaminaRechargeHandle;
+	float WalkSpeed = 300.0f;
+	float SprintSpeed = 700.0f;
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	
+	
+	
 	void OnDeath();
+	void RotationPlayerOnCursor();
+	void OnHealthChanged(float NewHealth);
 };
