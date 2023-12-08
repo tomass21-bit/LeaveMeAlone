@@ -75,6 +75,7 @@ private:
 	float FOV = 55.0f;
 	bool bIsSprinting = false;
 	float MaxStamina = 100.f;
+	UPROPERTY(VisibleAnywhere)
 	float CurrentStamina = MaxStamina;
 	float StaminaDrainAmount = -10.f;
 	float StaminaRechargeAmount = 10.f;

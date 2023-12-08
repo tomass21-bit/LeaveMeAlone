@@ -133,6 +133,7 @@ bool ULMAHealthComponent::IsHealthFull() const
 
 void ALMADefaultCharacter::StartSprint()
 {
+	
 	if (!bIsSprinting && CurrentStamina > 0)
 	{
 		bIsSprinting = true;
@@ -154,10 +155,7 @@ void ALMADefaultCharacter::StartSprint()
 	}
 
 	
-	if (bIsSprinting && CurrentStamina <= 0)
-	{
-		StopSprint();
-	}
+	
 }
 
 void ALMADefaultCharacter::StopSprint() 
@@ -179,8 +177,7 @@ void ALMADefaultCharacter::StopSprint()
 	
 	if (!GetWorldTimerManager().TimerExists(StaminaRechargeHandle))
 	{
-		GetWorldTimerManager().SetTimer(
-			StaminaRechargeHandle, this, &ALMADefaultCharacter::RechargeStamina, StaminaRechargeFrequency, true);
+		GetWorldTimerManager().SetTimer(StaminaRechargeHandle, this, &ALMADefaultCharacter::RechargeStamina, StaminaRechargeFrequency, true);
 	}
 
 }
@@ -194,12 +191,13 @@ void ALMADefaultCharacter::DrainStamina()
 	}
 
 	
-	if (CurrentStamina <= 0 && !bIsSprinting)
+	if (CurrentStamina <= 0 && bIsSprinting)
 	{
 		GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+		StopSprint();
 	}
 	
-	float StaminaPercent = CurrentStamina / MaxStamina;
+	//float StaminaPercent = CurrentStamina / MaxStamina;
 
 	
 }
@@ -220,7 +218,7 @@ void ALMADefaultCharacter::RechargeStamina()
 		GetWorldTimerManager().ClearTimer(StaminaRechargeHandle);
 	}
 
-	float StaminaPercent = CurrentStamina / MaxStamina;
+	//float StaminaPercent = CurrentStamina / MaxStamina;
 
 	
 
