@@ -10,7 +10,7 @@
 #include "Components/LMAHealthComponent.h"
 #include "TimerManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "Components/LMAWeaponComponent.h"
 
 // Sets default values
 ALMADefaultCharacter::ALMADefaultCharacter()
@@ -38,6 +38,7 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 	bUseControllerRotationRoll = false;
 
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	WeaponComponent = CreateDefaultSubobject<ULMAWeaponComponent>("Weapon");
 }
 
 // Called when the game starts or when spawned
@@ -74,7 +75,8 @@ void ALMADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAxis("Scroll", this, &ALMADefaultCharacter::Scroll);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ALMADefaultCharacter::StartSprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ALMADefaultCharacter::StopSprint);
-
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &ULMAWeaponComponent::Fire);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &ULMAWeaponComponent::Reload);
 }
 
 void ALMADefaultCharacter::MoveForward(float Value)

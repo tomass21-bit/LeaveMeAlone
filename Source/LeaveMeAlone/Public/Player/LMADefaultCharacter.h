@@ -10,8 +10,9 @@ class UCameraComponent;
 class USpringArmComponent;
 class UAnimMontage;
 class ULMAHealthComponent;
-
-UCLASS()
+class ULMAWeaponComponent; 
+	
+	UCLASS()
 class LEAVEMEALONE_API ALMADefaultCharacter : public ACharacter
 {
 	GENERATED_BODY()
@@ -54,6 +55,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* DeathMontage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	ULMAWeaponComponent* WeaponComponent;
 	
 	void StartSprint();
 	void StopSprint();
