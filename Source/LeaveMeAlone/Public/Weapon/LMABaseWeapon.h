@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LMABaseWeapon.generated.h"
-
+DECLARE_MULTICAST_DELEGATE(EmptyClip);
 USTRUCT(BlueprintType)
 struct FAmmoWeapon
 {
@@ -30,7 +30,10 @@ public:
 	// Sets default values for this actor's properties
 	ALMABaseWeapon();
 	void Fire();
+	void Stop_Fire();
 	void ChangeClip();
+	bool FullClip();
+	EmptyClip TryEmptyClip;
 
 protected:
 	// Called when the game starts or when spawned
@@ -48,6 +51,8 @@ protected:
 
 	void DecrementBullets();
 	bool IsCurrentClipEmpty() const;
+	
+	
 
 public:	
 	// Called every frame
@@ -55,5 +60,5 @@ public:
 
 private:
 	FAmmoWeapon CurrentAmmoWeapon;
-
+	FTimerHandle TShoot;
 };

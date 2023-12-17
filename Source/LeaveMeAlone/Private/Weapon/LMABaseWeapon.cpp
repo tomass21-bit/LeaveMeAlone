@@ -3,6 +3,7 @@
 
 #include "Weapon/LMABaseWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "TimerManager.h"
 DEFINE_LOG_CATEGORY_STATIC(LogWeapon, All, All);
 // Sets default values
 ALMABaseWeapon::ALMABaseWeapon()
@@ -29,7 +30,14 @@ void ALMABaseWeapon::Tick(float DeltaTime)
 
 void ALMABaseWeapon::Fire()
 {
-	Shoot();
+	ALMABaseWeapon::Shoot();
+	GetWorld()->GetTimerManager().SetTimer(TShoot, this, &ALMABaseWeapon::Shoot, 0.35f, true);
+	
+}
+
+void ALMABaseWeapon::Stop_Fire()
+{
+	GetWorldTimerManager().ClearTimer(TShoot);
 }
 
 void ALMABaseWeapon::Shoot()
@@ -66,6 +74,11 @@ void ALMABaseWeapon::DecrementBullets()
 	UE_LOG(LogWeapon, Display, TEXT("Bullets = %s"), *FString::FromInt(CurrentAmmoWeapon.Bullets));
 	if (IsCurrentClipEmpty())
 	{
-		ChangeClip();
+		
+		TryEmptyClip.Broadcast();
 	}
+}
+
+bool ALMABaseWeapon::FullClip() {
+	return CurrentAmmoWeapon.Bullets == 30;
 }

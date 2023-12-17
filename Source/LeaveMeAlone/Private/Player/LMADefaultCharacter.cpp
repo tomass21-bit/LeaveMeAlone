@@ -76,11 +76,18 @@ void ALMADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ALMADefaultCharacter::StartSprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ALMADefaultCharacter::StopSprint);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &ULMAWeaponComponent::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &ULMAWeaponComponent::Stop_Fire);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &ULMAWeaponComponent::Reload);
+
 }
 
 void ALMADefaultCharacter::MoveForward(float Value)
 {
+	if (Value > 0)
+	{
+		PermitSprint = true;
+	}
+	
 	AddMovementInput(GetActorForwardVector(), Value);
 }
 
@@ -136,7 +143,7 @@ bool ULMAHealthComponent::IsHealthFull() const
 void ALMADefaultCharacter::StartSprint()
 {
 	
-	if (!bIsSprinting && CurrentStamina > 0)
+	if (!bIsSprinting && CurrentStamina > 0&&PermitSprint==true)
 	{
 		bIsSprinting = true;
 
@@ -165,7 +172,7 @@ void ALMADefaultCharacter::StopSprint()
 	if (bIsSprinting)
 	{
 		bIsSprinting = false;
-
+		PermitSprint = false;
 		
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	}
@@ -199,9 +206,6 @@ void ALMADefaultCharacter::DrainStamina()
 		StopSprint();
 	}
 	
-	//float StaminaPercent = CurrentStamina / MaxStamina;
-
-	
 }
 
 
@@ -219,9 +223,4 @@ void ALMADefaultCharacter::RechargeStamina()
 	{
 		GetWorldTimerManager().ClearTimer(StaminaRechargeHandle);
 	}
-
-	//float StaminaPercent = CurrentStamina / MaxStamina;
-
-	
-
 }

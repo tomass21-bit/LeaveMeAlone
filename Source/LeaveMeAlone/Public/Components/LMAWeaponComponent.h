@@ -18,6 +18,7 @@ public:
 	// Sets default values for this component's properties
 	ULMAWeaponComponent();
 	void Fire();
+	void Stop_Fire();
 	void Reload();
 
 protected:
@@ -43,6 +44,8 @@ private:
 	bool AnimReloading = false;
 
 	void InitAnimNotify();
+	void InitReload();
+	void ExtReload();
 
 	void OnNotifyReloadFinished(USkeletalMeshComponent* SkeletalMesh);
 	bool CanReload() const;
