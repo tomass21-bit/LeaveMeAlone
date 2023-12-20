@@ -27,7 +27,6 @@ public:
 	
 	bool AddHealth(float NewHealth);
 	bool IsHealthFull() const;
-	
 	FOnDeath OnDeath;
 	FOnHealthChanged OnHealthChanged;
 

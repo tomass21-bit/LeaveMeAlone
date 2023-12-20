@@ -18,8 +18,11 @@ public:
 	// Sets default values for this component's properties
 	ULMAWeaponComponent();
 	void Fire();
+	UFUNCTION(BlueprintCallable)
 	void Stop_Fire();
 	void Reload();
+	UFUNCTION(BlueprintCallable)
+	bool GetCurrentWeaponAmmo(FAmmoWeapon& AmmoWeapon) const;
 
 protected:
 	// Called when the game starts

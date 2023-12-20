@@ -34,6 +34,7 @@ public:
 	void ChangeClip();
 	bool FullClip();
 	EmptyClip TryEmptyClip;
+	FAmmoWeapon GetCurrentAmmoWeapon() const { return CurrentAmmoWeapon; }
 
 protected:
 	// Called when the game starts or when spawned
